@@ -1,23 +1,45 @@
 const Product = require('../models/product');
 
+
+let limit_items = 2;
+
 exports.getProducts = (req, res, next) => {
-  Product.findAll()
-    .then(products => {
-         
-      res.json({products,sucess:true})
-      /*
-      res.render('shop/product-list', {
-        prods: products,
-        pageTitle: 'All Products',
-        path: '/products'
+  let page = req.query.page || 1;
+  let totalItems;
+
+  Product.count()
+    .then((totalProducts) => {
+      totalItems = totalProducts;
+      return Product.findAll({
+        offset: (page - 1) * limit_items,
+        limit: limit_items,
       });
-      */
     })
-    .catch(err => {
-      console.log(err);
+    .then((products) => {
+      res.status(200).json({
+        products,
+        success: true,
+        data: {
+          currentPage: page,
+          hasNextPage: totalItems > page * limit_items,
+          hasPreviousPage: page > 1,
+          nextPage: +page + 1,
+          previousPage: +page - 1,
+          lastPage: Math.ceil(totalItems / limit_items),
+        },
+      });
+      // res.render("shop/product-list", {
+      //   prods: products,
+      //   pageTitle: "All Products",
+      //   path: "/products",
+      // });
+    })
+    .catch((err) => {
+      res
+        .status(500)
+        .json({  message: "Error getting products " });
     });
 };
-
 exports.getProduct = (req, res, next) => {
   const prodId = req.params.productId;
   // Product.findAll({ where: { id: prodId } })
