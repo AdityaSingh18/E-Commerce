@@ -16,37 +16,10 @@ function getProducts(page){
     
     axios.get(`http://localhost:3000/products/?page=${page}`).then((products) => {
             showProductsOnScreen(products);
-            showPagination(products.data.data);
     })
     .catch(err => {
         showNotification(err, true);
     });
-}
-
-function showPagination({currentPage,hasNextPage,hasPreviousPage,nextPage,previousPage,lastPage}){
-
-    pagination.innerHTML ='';
-    
-    if(hasPreviousPage){
-        const button1 = document.createElement('button');
-        button1.innerHTML = previousPage ;
-        button1.addEventListener('click' , ()=>getProducts(previousPage))
-        pagination.appendChild(button1)
-    }
-    
-    const button2 = document.createElement('button');
-    button2.classList.add('active')
-    button2.innerHTML = currentPage ;
-    button2.addEventListener('click' , ()=>getProducts(currentPage))
-    pagination.appendChild(button2)
-
-    if(hasNextPage){
-        const button3 = document.createElement('button');
-        button3.innerHTML = nextPage ;
-        button3.addEventListener('click' , ()=>getProducts(nextPage))
-        pagination.appendChild(button3)
-    }
-
 }
 
 function showProductsOnScreen(products){
@@ -123,6 +96,20 @@ function getCartItems(){
         })
 }
 
+function deleteCartItem(e, prodId){
+    e.preventDefault();
+    axios.post('http://localhost:3000/cart-delete-item', {productId: prodId})
+        .then(() => removeElementFromCartDom(prodId))
+        .catch(err=>{
+            showNotification(err, true);
+        })
+}
+
+function removeElementFromCartDom(prodId){
+    document.getElementById(`in-cart-album-${prodId}`).remove();
+    showNotification('Succesfuly removed product')
+}
+
 function showProductsInCart(listofproducts){
     let total = 0 ; 
     cart_items.innerHTML = "";
@@ -152,14 +139,6 @@ function showProductsInCart(listofproducts){
 
      document.querySelector('.total-price').innerText = total  ;
 }
-function deleteCartItem(e, prodId){
-    e.preventDefault();
-    axios.post('http://localhost:3000/cart-delete-item', {productId: prodId})
-        .then(() => removeElementFromCartDom(prodId))
-        .catch(err=>{
-            showNotification(err, true);
-        })
-}
 
 function showNotification(message, iserror){
     const container = document.getElementById('container');
@@ -173,8 +152,4 @@ function showNotification(message, iserror){
     },2500)
 }
 
-function removeElementFromCartDom(prodId){
-        document.getElementById(`in-cart-album-${prodId}`).remove();
-        showNotification('Succesfuly removed product')
-}
 
