@@ -94,6 +94,23 @@ document.addEventListener('click',(e)=>{
     if (e.target.className=='cancel'){
         document.querySelector('#cart').style = "display:none;"
     }
+
+    if (e.target.className=='purchase-btn'){
+        if (parseInt(document.querySelector('.cart-number').innerText) === 0){
+            alert('You have Nothing in Cart , Add some products to purchase !');
+            return;
+        }
+        axios.post('http://localhost:3000/create-order')
+        .then(response=>{
+            getCartItems();
+            console.log(response);
+            alert('Thank you! for shopping with us')
+        })
+        .catch(err => {
+            showNotification(err, true);
+        });
+        
+    }
 })
 
 function getCartItems(){
